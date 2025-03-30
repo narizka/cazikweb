@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Casino Slot Machine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .slot-machine {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .reel {
+            display: flex;
+            justify-content: space-around;
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .symbol {
+            font-size: 40px;
+            padding: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .balance {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slot-machine">
+        <div class="balance">💰 Баланс: <span id="balance">100</span> грн</div>
+        
+        <div class="reel" id="reel">
+            <div class="symbol">🍒</div>
+            <div class="symbol">🍋</div>
+            <div class="symbol">🍊</div>
+            <div class="symbol">🍇</div>
+            <div class="symbol">7️⃣</div>
+        </div>
+        
+        <div class="controls">
+            <button id="spin-btn">🎰 Крутить (1 грн)</button>
+            <button id="back-btn">🔙 Назад в бот</button>
+        </div>
+    </div>
+
+    <script>
+        const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣', '⭐'];
+        let balance = 100;
+        let isSpinning = false;
+        
+        // Инициализация WebApp
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        
+        // Звуковые эффекты
+        const spinSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3');
+        const winSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3');
+        const loseSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3');
+        
+        // Получаем начальный баланс из бота
+        function updateBalance(change = 0) {
+            balance += change;
+            document.getElementById('balance').textContent = balance;
+            
+            // Отправляем обновление баланса в бот
+            fetch('/api/update_balance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    user_id: Telegram.WebApp.initDataUnsafe.user?.id,
+                    amount: change
+                })
+            });
+        }
+        
+        // Анимация вращения
+        async function spin() {
+            if (isSpinning || balance < 1) return;
+            
+            isSpinning = true;
+            updateBalance(-1);
+            spinSound.play();
+            
+            const reel = document.getElementById('reel');
+            const symbols = reel.querySelectorAll('.symbol');
+            const spinDuration = 3000; // 3 секунды
+            
+            // Анимация вращения
+            const startTime = Date.now();
+            const spinInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                
+                symbols.forEach(sym => {
+                    sym.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    sym.style.transform = `scale(${1 + 0.2 * Math.sin(progress * Math.PI * 10)})`;
+                });
+                
+                if (progress === 1) {
+                    clearInterval(spinInterval);
+                    finishSpin();
+                }
+            }, 100);
+        }
+        
+        // Завершение вращения
+        function finishSpin() {
+            isSpinning = false;
+            
+            // Генерация результата
+            const reel = document.getElementById('reel');
+            const result = generateResult();
+            
+            // Отображение результата
+            const symbols = reel.querySelectorAll('.symbol');
+            result.forEach((symbol, i) => {
+                setTimeout(() => {
+                    symbols[i].textContent = symbol;
+                    symbols[i].style.transform = 'scale(1.3)';
+                    setTimeout(() => symbols[i].style.transform = 'scale(1)', 200);
+                }, i * 200);
+            });
+            
+            // Проверка выигрыша
+            setTimeout(() => {
+                const winAmount = checkWin(result);
+                if (winAmount > 0) {
+                    winSound.play();
+                    updateBalance(winAmount);
+                    alert(`🎉 Вы выиграли ${winAmount} грн!`);
+                } else {
+                    loseSound.play();
+                }
+            }, 1500);
+        }
+        
+        // Генерация случайного результата
+        function generateResult() {
+            return [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+        }
+        
+        // Проверка выигрышных комбинаций
+        function checkWin(result) {
+            // Простая проверка на 3 одинаковых символа
+            if (result[0] === result[1] && result[1] === result[2]) {
+                if (result[0] === '7️⃣') return 25;
+                if (result[0] === '💎') return 15;
+                if (result[0] === '🔔') return 10;
+                return 5;
+            }
+            return 0;
+        }
+        
+        // Кнопка вращения
+        document.getElementById('spin-btn').addEventListener('click', spin);
+        
+        // Кнопка возврата в бота
+        document.getElementById('back-btn').addEventListener('click', () => {
+            Telegram.WebApp.close();
+        });
+    </script>
+</body>
+</html>

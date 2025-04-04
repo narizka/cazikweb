@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Guitar Slot - Бонусна Гра</title>
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-color: #ffd700;
+            --secondary-color: #e91e63;
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --reel-bg: rgba(30, 30, 60, 0.7);
+            --symbol-size: 80px;
+            --slot-machine-bg: rgba(10, 10, 30, 0.9);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Play', sans-serif;
+            background: var(--bg-gradient);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 10px;
+            touch-action: manipulation;
+        }
+        
+        .header {
+            width: 100%;
+            padding: 10px 0;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--main-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            letter-spacing: 2px;
+        }
+        
+        .slot-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+            perspective: 2000px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slot-machine {
+            background: var(--slot-machine-bg);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2),
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transform-style: preserve-3d;
+            transform: rotateX(5deg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin: 10px 0;
+            height: calc(100vh - 300px);
+            min-height: 300px;
+            max-height: 500px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            flex: 1;
+        }
+        
+        .reel {
+            width: calc(100% / 5);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: var(--reel-bg);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+        
+        .reel::before, .reel::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .reel::before {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+        }
+        
+        .reel::after {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+        }
+        
+        .symbol {
+            width: 100%;
+            height: var(--symbol-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            left: 0;
+            transition: transform 0.1s;
+        }
+        
+        .symbol img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            text-align: center;
+            flex: 1;
+            min-width: 25%;
+            padding: 5px;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 3px;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--main-color);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(229, 46, 113, 0.4);
+        }
+        
+        .spin-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .bet-control {
+            background: rgba(30, 30, 60, 0.8);
+            flex: 1;
+            min-width: 100px;
+            max-width: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .bet-btn {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .bet-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .win-line {
+            position: absolute;
+            background: rgba(0, 255, 0, 0.3);
+            z-index: 5;
+            border-radius: 5px;
+            pointer-events: none;
+            animation: linePulse 1.5s infinite;
+        }
+        
+        @keyframes linePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+        
+        .bonus-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .bonus-container {
+            width: 90%;
+            max-width: 400px;
+            background: url('https://i.imgur.com/JYjB8qN.jpg') center/cover;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(233, 30, 99, 0.5);
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 30px rgba(233, 30, 99, 0.5); }
+            to { box-shadow: 0 0 50px rgba(255, 215, 0, 0.7); }
+        }
+        
+        .bonus-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 30, 0.7);
+            z-index: -1;
+        }
+        
+        .bonus-title {
+            font-size: 2rem;
+            color: var(--main-color);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            animation: titleFloat 3s infinite ease-in-out;
+        }
+        
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .bonus-message {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .bonus-spins {
+            font-size: 1.8rem;
+            color: var(--main-color);
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .multiplier-ball {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, gold, #ff8c00);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 0 20px gold;
+            animation: pulse 2s infinite;
+        }
+        
+        .collect-btn {
+            background: linear-gradient(45deg, var(--main-color), #ff8a00);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 999;
+            animation: confettiFall 5s linear forwards;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .symbol-highlight {
+            animation: symbolBlink 0.5s 3;
+        }
+        
+        @keyframes symbolBlink {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .jackpot-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.imgur.com/ZuQTe5B.gif') center/cover;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            flex-direction: column;
+        }
+        
+        .jackpot-text {
+            font-size: 3rem;
+            color: var(--main-color);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+                         0 0 30px rgba(255, 215, 0, 0.6),
+                         0 0 40px rgba(255, 215, 0, 0.4);
+            animation: jackpotPulse 1s infinite alternate;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes jackpotPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
+        .jackpot-amount {
+            font-size: 2rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            animation: jackpotFloat 2s infinite ease-in-out;
+        }
+        
+        @keyframes jackpotFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .autoplay-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .autoplay-btn {
+            padding: 8px 15px;
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .autoplay-btn:hover {
+            background: rgba(50, 50, 80, 0.8);
+        }
+        
+        .autoplay-btn.active {
+            background: var(--secondary-color);
+            box-shadow: 0 0 15px rgba(233, 30, 99, 0.5);
+        }
+        
+        .bonus-symbol {
+            animation: bonusGlow 1.5s infinite alternate, float 3s infinite ease-in-out;
+            position: relative;
+        }
+        
+        @keyframes bonusGlow {
+            from { 
+                filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)) 
+                       brightness(1);
+            }
+            to { 
+                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9)) 
+                       brightness(1.5);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .wild-symbol {
+            animation: wildPulse 1s infinite alternate;
+        }
+        
+        @keyframes wildPulse {
+            from { 
+                filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5)) 
+                       brightness(1);
+            }
+            to { 
+                filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.9)) 
+                       brightness(1.5);
+            }
+        }
+        
+        .win-amount {
+            position: absolute;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--main-color);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            animation: winFloat 2s ease-out forwards;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        @keyframes winFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
+        }
+        
+        .bonus-result-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            animation: fadeIn 0.5s;
+        }
+        
+        .bonus-result-container {
+            width: 90%;
+            max-width: 350px;
+            background: rgba(20, 20, 50, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            border: 2px solid var(--main-color);
+        }
+        
+        .bonus-result-title {
+            font-size: 1.8rem;
+            color: var(--main-color);
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        .bonus-result-image {
+            width: 100px;
+            height: 100px;
+            margin: 15px auto;
+            object-fit: contain;
+        }
+        
+        .bonus-result-amount {
+            font-size: 1.5rem;
+            color: white;
+            margin: 15px 0;
+        }
+        
+        .bonus-result-button {
+            background: linear-gradient(45deg, var(--main-color), #ff8a00);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--main-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: var(--main-color);
+            font-size: 1.2rem;
+        }
+        
+        /* Mobile specific styles */
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .info-value {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .bet-control {
+                min-width: 80px;
+            }
+            
+            .bet-btn {
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
+            }
+            
+            .autoplay-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .bonus-title {
+                font-size: 1.5rem;
+            }
+            
+            .bonus-message {
+                font-size: 0.9rem;
+            }
+            
+            .bonus-spins {
+                font-size: 1.3rem;
+            }
+            
+            .jackpot-text {
+                font-size: 2rem;
+            }
+            
+            .jackpot-amount {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Завантаження гри...</div>
+    </div>
+    
+    <div class="header">
+        <div class="logo">Гітарний Бонус</div>
+    </div>
+    
+    <div class="slot-container">
+        <div class="slot-machine">
+            <div class="info-panel">
+                <div class="info-item">
+                    <div class="info-label">Баланс</div>
+                    <div class="info-value" id="balance">10000</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Ставка</div>
+                    <div class="info-value" id="bet">10</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Виграш</div>
+                    <div class="info-value" id="win">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Бонус Спіни</div>
+                    <div class="info-value" id="bonusSpins">0</div>
+                </div>
+            </div>
+            
+            <div class="reels-container" id="reels">
+                <!-- Reels will be generated here -->
+            </div>
+            
+            <div class="controls">
+                <div class="btn bet-control">
+                    <span class="bet-btn" id="betDown">-</span>
+                    <span id="betValue">10</span>
+                    <span class="bet-btn" id="betUp">+</span>
+                </div>
+                <button class="btn spin-btn" id="spinBtn">Крутити</button>
+                <button class="btn bet-control" id="maxBet">Макс</button>
+            </div>
+            
+            <div class="autoplay-controls">
+                <div class="autoplay-btn" id="autoplay10">10</div>
+                <div class="autoplay-btn" id="autoplay25">25</div>
+                <div class="autoplay-btn" id="autoplay50">50</div>
+                <div class="autoplay-btn" id="autoplay100">100</div>
+                <div class="autoplay-btn" id="autoplayStop">Стоп</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bonus-overlay" id="bonusOverlay">
+        <div class="bonus-container">
+            <div class="bonus-title">БОНУСНА ГРА!</div>
+            <div class="bonus-message">Ви отримали 10 безкоштовних спінів з множниками!</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3022/3022555.png" alt="Bonus" style="width: 80px; height: 80px; margin: 15px auto; display: block;">
+            <div class="bonus-spins" id="remainingSpins">Залишилось спінів: 10</div>
+            <button class="btn collect-btn" id="startBonus">Почати Бонус</button>
+        </div>
+    </div>
+    
+    <div class="bonus-result-overlay" id="bonusResultOverlay">
+        <div class="bonus-result-container">
+            <div class="bonus-result-title">РЕЗУЛЬТАТ БОНУСНОЇ ГРИ</div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3022/3022555.png" alt="Bonus" class="bonus-result-image">
+            <div class="bonus-result-amount" id="bonusResultAmount">Ви виграли: 0 ₴</div>
+            <button class="bonus-result-button" id="closeBonusResult">OK</button>
+        </div>
+    </div>
+    
+    <div class="jackpot-animation" id="jackpotAnimation">
+        <div class="jackpot-text">ДЖЕКПОТ!</div>
+        <div class="jackpot-amount" id="jackpotAmount">10000 ₴</div>
+    </div>
+    
+    <!-- Audio elements -->
+    <audio id="spinSound" preload="auto">
+        <source src="spin.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="winSound" preload="auto">
+        <source src="win.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bonusSound" preload="auto">
+        <source src="bonus.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="jackpotSound" preload="auto">
+        <source src="jackpot.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // Game configuration
+        const config = {
+            symbols: [
+                { name: 'cherry', icon: '🍒', image: 'https://cdn-icons-png.flaticon.com/512/1406/1406953.png' },
+                { name: 'lemon', icon: '🍋', image: 'https://cdn-icons-png.flaticon.com/512/2276/2276931.png' },
+                { name: 'orange', icon: '🍊', image: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png' },
+                { name: 'plum', icon: '🍇', image: 'https://cdn-icons-png.flaticon.com/512/1573/1573711.png' },
+                { name: 'watermelon', icon: '🍉', image: 'https://cdn-icons-png.flaticon.com/512/2909/2909553.png' },
+                { name: 'seven', icon: '7', image: 'https://cdn-icons-png.flaticon.com/512/2693/2693735.png' },
+                { name: 'diamond', icon: '💎', image: 'https://cdn-icons-png.flaticon.com/512/3132/3132735.png' },
+                { name: 'guitar', icon: '🎸', image: 'https://cdn-icons-png.flaticon.com/512/3022/3022555.png' },
+                { name: 'wild', icon: '✨', image: 'https://cdn-icons-png.flaticon.com/512/3521/3521962.png' }
+            ],
+            reelCount: 5,
+            rows: 6,
+            minBet: 10,
+            maxBet: 500,
+            betStep: 10,
+            balance: 10000,
+            bonusSymbol: 'guitar',
+            bonusTrigger: 3,
+            bonusSpins: 10,
+            multipliers: [
+                { value: 2, weight: 40 },
+                { value: 3, weight: 30 },
+                { value: 5, weight: 15 },
+                { value: 10, weight: 10 },
+                { value: 20, weight: 4 },
+                { value: 50, weight: 1 },
+                { value: 100, weight: 0.1 }
+            ],
+            winLines: [
+                // Horizontal lines
+                [{reel: 0, row: 0}, {reel: 1, row: 0}, {reel: 2, row: 0}, {reel: 3, row: 0}, {reel: 4, row: 0}],
+                [{reel: 0, row: 1}, {reel: 1, row: 1}, {reel: 2, row: 1}, {reel: 3, row: 1}, {reel: 4, row: 1}],
+                [{reel: 0, row: 2}, {reel: 1, row: 2}, {reel: 2, row: 2}, {reel: 3, row: 2}, {reel: 4, row: 2}],
+                [{reel: 0, row: 3}, {reel: 1, row: 3}, {reel: 2, row: 3}, {reel: 3, row: 3}, {reel: 4, row: 3}],
+                [{reel: 0, row: 4}, {reel: 1, row: 4}, {reel: 2, row: 4}, {reel: 3, row: 4}, {reel: 4, row: 4}],
+                [{reel: 0, row: 5}, {reel: 1, row: 5}, {reel: 2, row: 5}, {reel: 3, row: 5}, {reel: 4, row: 5}],
+                // Diagonals
+                [{reel: 0, row: 0}, {reel: 1, row: 1}, {reel: 2, row: 2}, {reel: 3, row: 3}, {reel: 4, row: 4}],
+                [{reel: 0, row: 1}, {reel: 1, row: 2}, {reel: 2, row: 3}, {reel: 3, row: 4}, {reel: 4, row: 5}],
+                [{reel: 0, row: 5}, {reel: 1, row: 4}, {reel: 2, row: 3}, {reel: 3, row: 2}, {reel: 4, row: 1}],
+                [{reel: 0, row: 4}, {reel: 1, row: 3}, {reel: 2, row: 2}, {reel: 3, row: 1}, {reel: 4, row: 0}]
+            ],
+            paytable: {
+                'cherry': {3: 1, 4: 3, 5: 10},
+                'lemon': {3: 1, 4: 3, 5: 10},
+                'orange': {3: 2, 4: 5, 5: 15},
+                'plum': {3: 2, 4: 7, 5: 20},
+                'watermelon': {3: 3, 4: 10, 5: 30},
+                'seven': {3: 5, 4: 20, 5: 50},
+                'diamond': {3: 10, 4: 30, 5: 100},
+                'guitar': {3: 20, 4: 50, 5: 200},
+                'wild': {3: 0, 4: 0, 5: 0} // Wild substitutes for others
+            },
+            symbolWeights: [
+                {name: 'cherry', weight: 15},
+                {name: 'lemon', weight: 15},
+                {name: 'orange', weight: 12},
+                {name: 'plum', weight: 12},
+                {name: 'watermelon', weight: 10},
+                {name: 'seven', weight: 8},
+                {name: 'diamond', weight: 5},
+                {name: 'guitar', weight: 3},
+                {name: 'wild', weight: 0} // Only in bonus game
+            ]
+        };
+        
+        // DOM elements
+        const reelsContainer = document.getElementById('reels');
+        const balanceEl = document.getElementById('balance');
+        const betEl = document.getElementById('bet');
+        const winEl = document.getElementById('win');
+        const bonusSpinsEl = document.getElementById('bonusSpins');
+        const spinBtn = document.getElementById('spinBtn');
+        const betUpBtn = document.getElementById('betUp');
+        const betDownBtn = document.getElementById('betDown');
+        const maxBetBtn = document.getElementById('maxBet');
+        const betValueEl = document.getElementById('betValue');
+        const bonusOverlay = document.getElementById('bonusOverlay');
+        const remainingSpinsEl = document.getElementById('remainingSpins');
+        const startBonusBtn = document.getElementById('startBonus');
+        const jackpotAnimation = document.getElementById('jackpotAnimation');
+        const jackpotAmountEl = document.getElementById('jackpotAmount');
+        const autoplay10 = document.getElementById('autoplay10');
+        const autoplay25 = document.getElementById('autoplay25');
+        const autoplay50 = document.getElementById('autoplay50');
+        const autoplay100 = document.getElementById('autoplay100');
+        const autoplayStop = document.getElementById('autoplayStop');
+        const bonusResultOverlay = document.getElementById('bonusResultOverlay');
+        const bonusResultAmount = document.getElementById('bonusResultAmount');
+        const closeBonusResult = document.getElementById('closeBonusResult');
+        const loadingScreen = document.getElementById('loadingScreen');
+        
+        // Audio elements
+        const spinSound = document.getElementById('spinSound');
+        const winSound = document.getElementById('winSound');
+        const bonusSound = document.getElementById('bonusSound');
+        const jackpotSound = document.getElementById('jackpotSound');
+        const clickSound = document.getElementById('clickSound');
+        
+        // Game state
+        let reels = [];
+        let spinning = false;
+        let autoplay = false;
+        let autoplayCount = 0;
+        let autoplayTotal = 0;
+        let inBonusGame = false;
+        let bonusSpinsLeft = 0;
+        let currentMultiplier = 1;
+        let savedAutoplayCount = 0;
+        let bonusGameWinTotal = 0;
+        let soundsLoaded = 0;
+        let imagesLoaded = 0;
+        const totalSounds = 5;
+        const totalImages = 9;
+        
+        // Initialize the game after all assets are loaded
+        function init() {
+            // Check if all assets are loaded
+            if (soundsLoaded < totalSounds || imagesLoaded < totalImages) {
+                setTimeout(init, 100);
+                return;
+            }
+            
+            // Hide loading screen
+            loadingScreen.style.display = 'none';
+            
+            // Get balance from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const balanceParam = urlParams.get('balance');
+            if (balanceParam && !isNaN(parseInt(balanceParam))) {
+                config.balance = parseInt(balanceParam);
+            }
+            
+            createReels();
+            updateUI();
+            setupEventListeners();
+        }
+        
+        // Preload sounds
+        function preloadSounds() {
+            const sounds = [spinSound, winSound, bonusSound, jackpotSound, clickSound];
+            let loaded = 0;
+            
+            sounds.forEach(sound => {
+                sound.volume = 0.5;
+                sound.addEventListener('canplaythrough', () => {
+                    loaded++;
+                    soundsLoaded = loaded;
+                    if (loaded === sounds.length) {
+                        init();
+                    }
+                }, {once: true});
+                
+                sound.addEventListener('error', () => {
+                    console.error('Error loading sound:', sound.src);
+                    loaded++;
+                    soundsLoaded = loaded;
+                    if (loaded === sounds.length) {
+                        init();
+                    }
+                }, {once: true});
+                
+                // Try to load the sound
+                sound.load().catch(e => console.log('Sound load error:', e));
+            });
+        }
+        
+        // Preload images
+        function preloadImages() {
+            let loaded = 0;
+            const total = config.symbols.length;
+            
+            config.symbols.forEach(symbol => {
+                const img = new Image();
+                img.src = symbol.image;
+                img.onload = () => {
+                    loaded++;
+                    imagesLoaded = loaded;
+                    if (loaded === total) {
+                        init();
+                    }
+                };
+                img.onerror = () => {
+                    console.error('Error loading image:', symbol.image);
+                    loaded++;
+                    imagesLoaded = loaded;
+                    if (loaded === total) {
+                        init();
+                    }
+                };
+            });
+        }
+        
+        // Create reels structure
+        function createReels() {
+            reelsContainer.innerHTML = '';
+            reels = [];
+            
+            for (let i = 0; i < config.reelCount; i++) {
+                const reel = document.createElement('div');
+                reel.className = 'reel';
+                reelsContainer.appendChild(reel);
+                
+                const reelSymbols = [];
+                for (let j = 0; j < config.rows + 2; j++) { // +2 for smooth animation
+                    const symbol = document.createElement('div');
+                    symbol.className = 'symbol';
+                    
+                    const symbolData = getRandomSymbol();
+                    const img = document.createElement('img');
+                    img.src = symbolData.image;
+                    img.alt = symbolData.name;
+                    symbol.appendChild(img);
+                    
+                    if (symbolData.name === 'guitar') {
+                        img.classList.add('bonus-symbol');
+                    }
+                    
+                    reel.appendChild(symbol);
+                    reelSymbols.push({
+                        element: symbol,
+                        name: symbolData.name,
+                        icon: symbolData.icon,
+                        image: symbolData.image
+                    });
+                }
+                
+                reels.push(reelSymbols);
+            }
+        }
+        
+        // Get random symbol based on weights
+        function getRandomSymbol() {
+            // In bonus game, include wild symbols
+            const currentSymbols = inBonusGame 
+                ? [...config.symbolWeights, {name: 'wild', weight: 15}]
+                : config.symbolWeights;
+            
+            const totalWeight = currentSymbols.reduce((sum, symbol) => sum + symbol.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const symbol of currentSymbols) {
+                if (random < symbol.weight) {
+                    return config.symbols.find(s => s.name === symbol.name);
+                }
+                random -= symbol.weight;
+            }
+            
+            return config.symbols[0];
+        }
+        
+        // Get random multiplier
+        function getRandomMultiplier() {
+            const totalWeight = config.multipliers.reduce((sum, m) => sum + m.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const multiplier of config.multipliers) {
+                if (random < multiplier.weight) {
+                    return multiplier.value;
+                }
+                random -= multiplier.weight;
+            }
+            
+            return 2;
+        }
+        
+        // Spin the reels
+        function spin() {
+            if (spinning || (config.balance < config.bet && !inBonusGame)) return;
+            
+            spinning = true;
+            
+            // Deduct bet if not in bonus game
+            if (!inBonusGame) {
+                config.balance -= config.bet;
+                updateUI();
+            } else {
+                // Decrease bonus spins counter
+                bonusSpinsLeft--;
+                bonusSpinsEl.textContent = bonusSpinsLeft;
+                remainingSpinsEl.textContent = `Залишилось спінів: ${bonusSpinsLeft}`;
+                
+                // Reset multiplier for this spin
+                currentMultiplier = 1;
+            }
+            
+            // Clear previous win lines and highlights
+            clearWinEffects();
+            
+            // Play spin sound
+            playSound(spinSound);
+            
+            // Spin each reel with different durations for cascading effect
+            const spinPromises = [];
+            for (let i = 0; i < config.reelCount; i++) {
+                spinPromises.push(spinReel(i, 1000 + i * 200));
+            }
+            
+            // When all reels stop spinning
+            Promise.all(spinPromises).then(() => {
+                spinning = false;
+                const winAmount = checkWin();
+                
+                // Add to bonus game win total if in bonus game
+                if (inBonusGame && winAmount > 0) {
+                    bonusGameWinTotal += winAmount;
+                }
+                
+                // Continue autoplay if active
+                if (autoplay && autoplayCount > 0) {
+                    autoplayCount--;
+                    setTimeout(spin, 1000);
+                }
+                
+                // Check if bonus game ended
+                if (inBonusGame && bonusSpinsLeft <= 0) {
+                    inBonusGame = false;
+                    showBonusResult();
+                }
+            });
+        }
+        
+        // Spin a single reel
+        function spinReel(reelIndex, duration) {
+            return new Promise(resolve => {
+                const reel = reels[reelIndex];
+                const startTime = performance.now();
+                
+                // Generate new symbols for the reel
+                const newSymbols = [];
+                for (let i = 0; i < config.rows; i++) {
+                    const symbolData = getRandomSymbol();
+                    newSymbols.push({
+                        name: symbolData.name,
+                        icon: symbolData.icon,
+                        image: symbolData.image
+                    });
+                }
+                
+                function animate(time) {
+                    const elapsed = time - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easing = easeOutCubic(progress);
+                    
+                    // Move symbols down
+                    reel.forEach((symbol, index) => {
+                        const pos = (index - easing * (config.rows + 2)) * 100;
+                        symbol.element.style.transform = `translateY(${pos}px)`;
+                    });
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Remove extra symbols and add new ones at the top
+                        while (reel.length > config.rows) {
+                            reel.pop();
+                            reel[0].element.remove();
+                            reel.shift();
+                        }
+                        
+                        // Update symbols with new values
+                        newSymbols.forEach((symbolData, index) => {
+                            reel[index].name = symbolData.name;
+                            reel[index].icon = symbolData.icon;
+                            reel[index].image = symbolData.image;
+                            reel[index].element.innerHTML = '';
+                            
+                            const img = document.createElement('img');
+                            img.src = symbolData.image;
+                            img.alt = symbolData.name;
+                            
+                            if (symbolData.name === 'guitar') {
+                                img.classList.add('bonus-symbol');
+                            } else if (symbolData.name === 'wild') {
+                                img.classList.add('wild-symbol');
+                            }
+                            
+                            reel[index].element.appendChild(img);
+                        });
+                        
+                        // Reset positions
+                        reel.forEach((symbol, index) => {
+                            symbol.element.style.transform = `translateY(${index * 100}px)`;
+                        });
+                        
+                        resolve();
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            });
+        }
+        
+        // Easing function for smooth animation
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        // Check for winning combinations
+        function checkWin() {
+            let totalWin = 0;
+            let bonusSymbols = 0;
+            const winningLines = [];
+            const wildSymbols = [];
+            
+            // Count bonus symbols and find wilds
+            for (let i = 0; i < config.reelCount; i++) {
+                for (let j = 0; j < config.rows; j++) {
+                    if (reels[i][j].name === config.bonusSymbol) {
+                        bonusSymbols++;
+                    } else if (reels[i][j].name === 'wild') {
+                        wildSymbols.push({reel: i, row: j});
+                    }
+                }
+            }
+            
+            // Apply wild symbols (substitute for any symbol except bonus)
+            wildSymbols.forEach(pos => {
+                // Find adjacent symbols to determine what to substitute
+                let substituteFor = null;
+                
+                // Check left
+                if (pos.reel > 0) {
+                    const leftSymbol = reels[pos.reel-1][pos.row].name;
+                    if (leftSymbol !== config.bonusSymbol && leftSymbol !== 'wild') {
+                        substituteFor = leftSymbol;
+                    }
+                }
+                
+                // Check right if not found
+                if (!substituteFor && pos.reel < config.reelCount-1) {
+                    const rightSymbol = reels[pos.reel+1][pos.row].name;
+                    if (rightSymbol !== config.bonusSymbol && rightSymbol !== 'wild') {
+                        substituteFor = rightSymbol;
+                    }
+                }
+                
+                // If still not found, use first non-bonus symbol
+                if (!substituteFor) {
+                    for (let i = 0; i < config.reelCount && !substituteFor; i++) {
+                        for (let j = 0; j < config.rows && !substituteFor; j++) {
+                            const symbol = reels[i][j].name;
+                            if (symbol !== config.bonusSymbol && symbol !== 'wild') {
+                                substituteFor = symbol;
+                            }
+                        }
+                    }
+                }
+                
+                // Apply substitution
+                if (substituteFor) {
+                    reels[pos.reel][pos.row].name = substituteFor;
+                    reels[pos.reel][pos.row].element.querySelector('img').src = 
+                        config.symbols.find(s => s.name === substituteFor).image;
+                }
+            });
+            
+            // Apply multipliers in bonus game
+            if (inBonusGame && wildSymbols.length > 0) {
+                wildSymbols.forEach(pos => {
+                    const multiplier = getRandomMultiplier();
+                    currentMultiplier *= multiplier;
+                    
+                    // Show multiplier on the symbol
+                    const multElement = document.createElement('div');
+                    multElement.className = 'multiplier-ball';
+                    multElement.textContent = `x${multiplier}`;
+                    multElement.style.position = 'absolute';
+                    multElement.style.top = '50%';
+                    multElement.style.left = '50%';
+                    multElement.style.transform = 'translate(-50%, -50%)';
+                    multElement.style.zIndex = '10';
+                    
+                    reels[pos.reel][pos.row].element.appendChild(multElement);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        multElement.remove();
+                    }, 2000);
+                });
+            }
+            
+            // Check each payline for wins
+            config.winLines.forEach((line, lineIndex) => {
+                let firstSymbol = reels[line[0].reel][line[0].row].name;
+                let count = 1;
+                
+                // Skip if first symbol is bonus (handled separately)
+                if (firstSymbol === config.bonusSymbol) return;
+                
+                // Count matching symbols
+                for (let i = 1; i < line.length; i++) {
+                    const symbol = reels[line[i].reel][line[i].row].name;
+                    if (symbol === firstSymbol) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Calculate win if any
+                if (config.paytable[firstSymbol] && config.paytable[firstSymbol][count]) {
+                    let winAmount = config.bet * config.paytable[firstSymbol][count];
+                    
+                    // Apply multiplier in bonus game
+                    if (inBonusGame) {
+                        winAmount *= currentMultiplier;
+                    }
+                    
+                    totalWin += winAmount;
+                    winningLines.push({line, count, symbol: firstSymbol});
+                }
+            });
+            
+            // Highlight winning lines and symbols
+            if (winningLines.length > 0) {
+                winningLines.forEach(win => {
+                    highlightWinLine(win.line, win.count, win.symbol);
+                });
+                
+                // Play win sound
+                playSound(winSound);
+                
+                // Show win amount animation
+                showWinAmount(totalWin);
+                
+                // Show confetti for big wins
+                if (totalWin >= config.bet * 20) {
+                    showConfetti();
+                }
+            }
+            
+            // Update balance and UI
+            if (totalWin > 0) {
+                config.balance += totalWin;
+                winEl.textContent = totalWin;
+                
+                // In bonus game, show multiplier if applied
+                if (inBonusGame && currentMultiplier > 1) {
+                    winEl.textContent += ` (x${currentMultiplier})`;
+                }
+            }
+            
+            updateUI();
+            
+            // Check for bonus game trigger (only if not already in bonus game)
+            if (!inBonusGame && bonusSymbols >= config.bonusTrigger) {
+                // Stop current autoplay if active
+                if (autoplay) {
+                    savedAutoplayCount = autoplayCount;
+                    autoplay = false;
+                    autoplayCount = 0;
+                }
+                
+                setTimeout(() => {
+                    triggerBonusGame();
+                }, 1500);
+            }
+            
+            // Jackpot for 5 guitars
+            if (bonusSymbols >= 5) {
+                showJackpot();
+            }
+            
+            return totalWin;
+        }
+        
+        // Show win amount animation
+        function showWinAmount(amount) {
+            const winAmount = document.createElement('div');
+            winAmount.className = 'win-amount';
+            winAmount.textContent = `+${amount} ₴`;
+            winAmount.style.left = `${Math.random() * 50 + 25}%`;
+            winAmount.style.top = `${Math.random() * 50 + 25}%`;
+            
+            document.body.appendChild(winAmount);
+            
+            // Remove after animation
+            setTimeout(() => {
+                winAmount.remove();
+            }, 2000);
+        }
+        
+        // Highlight a winning line
+        function highlightWinLine(line, count, symbol) {
+            // Create line element
+            const lineElement = document.createElement('div');
+            lineElement.className = 'win-line';
+            
+            // Calculate position and size
+            const firstPos = reels[line[0].reel][line[0].row].element.getBoundingClientRect();
+            const lastPos = reels[line[count-1].reel][line[count-1].row].element.getBoundingClientRect();
+            const containerPos = reelsContainer.getBoundingClientRect();
+            
+            const width = lastPos.right - firstPos.left;
+            const height = lastPos.bottom - firstPos.top;
+            const left = firstPos.left - containerPos.left;
+            const top = firstPos.top - containerPos.top;
+            
+            lineElement.style.width = `${width}px`;
+            lineElement.style.height = `${height}px`;
+            lineElement.style.left = `${left}px`;
+            lineElement.style.top = `${top}px`;
+            
+            reelsContainer.appendChild(lineElement);
+            
+            // Highlight symbols
+            for (let i = 0; i < count; i++) {
+                const {reel, row} = line[i];
+                reels[reel][row].element.classList.add('symbol-highlight');
+                
+                setTimeout(() => {
+                    reels[reel][row].element.classList.remove('symbol-highlight');
+                }, 2000);
+            }
+            
+            // Remove line after animation
+            setTimeout(() => {
+                lineElement.remove();
+            }, 3000);
+        }
+        
+        // Clear all win effects
+        function clearWinEffects() {
+            // Clear win lines
+            document.querySelectorAll('.win-line').forEach(el => el.remove());
+            
+            // Clear symbol highlights
+            reels.forEach(reel => {
+                reel.forEach(symbol => {
+                    symbol.element.classList.remove('symbol-highlight');
+                });
+            });
+            
+            // Reset win display
+            winEl.textContent = '0';
+        }
+        
+        // Trigger bonus game
+        function triggerBonusGame() {
+            bonusSpinsLeft = config.bonusSpins;
+            bonusSpinsEl.textContent = bonusSpinsLeft;
+            bonusGameWinTotal = 0;
+            
+            // Show bonus overlay
+            bonusOverlay.style.display = 'flex';
+            remainingSpinsEl.textContent = `Залишилось спінів: ${bonusSpinsLeft}`;
+            
+            // Play bonus sound
+            playSound(bonusSound);
+        }
+        
+        // Start bonus game
+        function startBonusGame() {
+            inBonusGame = true;
+            bonusOverlay.style.display = 'none';
+            
+            // Start autoplay for bonus spins
+            autoplay = true;
+            autoplayCount = bonusSpinsLeft;
+            
+            spin();
+        }
+        
+        // Show bonus game result
+        function showBonusResult() {
+            bonusResultAmount.textContent = `Ви виграли: ${bonusGameWinTotal} ₴`;
+            bonusResultOverlay.style.display = 'flex';
+            playSound(winSound);
+            
+            // Restore autoplay if it was active before bonus
+            if (savedAutoplayCount > 0) {
+                autoplay = true;
+                autoplayCount = savedAutoplayCount;
+                savedAutoplayCount = 0;
+                setTimeout(spin, 2000);
+            }
+        }
+        
+        // Close bonus result
+        function closeBonusResultHandler() {
+            bonusResultOverlay.style.display = 'none';
+            playSound(clickSound);
+        }
+        
+        // Show jackpot animation
+        function showJackpot() {
+            const jackpotAmount = config.bet * 1000;
+            jackpotAmountEl.textContent = `${jackpotAmount} ₴`;
+            
+            jackpotAnimation.style.display = 'flex';
+            playSound(jackpotSound);
+            
+            setTimeout(() => {
+                jackpotAnimation.style.display = 'none';
+                config.balance += jackpotAmount;
+                updateUI();
+                showConfetti(500);
+            }, 5000);
+        }
+        
+        // Show confetti effect
+        function showConfetti(count = 100) {
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                const left = Math.random() * 100;
+                const animationDuration = Math.random() * 3 + 2;
+                
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.backgroundColor = color;
+                confetti.style.left = `${left}%`;
+                confetti.style.animationDuration = `${animationDuration}s`;
+                
+                document.body.appendChild(confetti);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000);
+            }
+        }
+        
+        // Play sound
+        function playSound(audio) {
+            try {
+                if (audio.paused) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log('Audio play error:', e));
+                } else {
+                    // If sound is already playing, create a clone to play simultaneously
+                    const clone = audio.cloneNode();
+                    clone.currentTime = 0;
+                    clone.play().catch(e => console.log('Audio play error:', e));
+                    setTimeout(() => clone.remove(), 3000);
+                }
+            } catch (e) {
+                console.log('Sound error:', e);
+            }
+        }
+        
+        // Update UI elements
+        function updateUI() {
+            balanceEl.textContent = config.balance;
+            betEl.textContent = config.bet;
+            betValueEl.textContent = config.bet;
+            bonusSpinsEl.textContent = bonusSpinsLeft;
+            
+            // Disable buttons if needed
+            spinBtn.disabled = spinning || (config.balance < config.bet && !inBonusGame);
+            betUpBtn.disabled = spinning || config.bet >= config.maxBet;
+            betDownBtn.disabled = spinning || config.bet <= config.minBet;
+            maxBetBtn.disabled = spinning || config.bet >= config.maxBet || config.balance < config.maxBet;
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Spin button
+            spinBtn.addEventListener('click', () => {
+                playSound(clickSound);
+                spin();
+            });
+            
+            // Bet controls
+            betUpBtn.addEventListener('click', () => {
+                if (!spinning && config.bet < config.maxBet) {
+                    config.bet = Math.min(config.bet + config.betStep, config.maxBet);
+                    updateUI();
+                    playSound(clickSound);
+                }
+            });
+            
+            betDownBtn.addEventListener('click', () => {
+                if (!spinning && config.bet > config.minBet) {
+                    config.bet = Math.max(config.bet - config.betStep, config.minBet);
+                    updateUI();
+                    playSound(clickSound);
+                }
+            });
+            
+            maxBetBtn.addEventListener('click', () => {
+                if (!spinning) {
+                    config.bet = Math.min(config.maxBet, config.balance);
+                    updateUI();
+                    playSound(clickSound);
+                }
+            });
+            
+            // Start bonus game button
+            startBonusBtn.addEventListener('click', () => {
+                playSound(clickSound);
+                startBonusGame();
+            });
+            
+            // Close bonus result button
+            closeBonusResult.addEventListener('click', closeBonusResultHandler);
+            
+            // Autoplay
+            autoplay10.addEventListener('click', () => setAutoplay(10));
+            autoplay25.addEventListener('click', () => setAutoplay(25));
+            autoplay50.addEventListener('click', () => setAutoplay(50));
+            autoplay100.addEventListener('click', () => setAutoplay(100));
+            autoplayStop.addEventListener('click', stopAutoplay);
+        }
+        
+        // Set autoplay
+        function setAutoplay(count) {
+            if (spinning) return;
+            
+            playSound(clickSound);
+            autoplay = true;
+            autoplayCount = count;
+            autoplayTotal = count;
+            
+            // Update UI
+            [autoplay10, autoplay25, autoplay50, autoplay100].forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (count === 10) autoplay10.classList.add('active');
+            if (count === 25) autoplay25.classList.add('active');
+            if (count === 50) autoplay50.classList.add('active');
+            if (count === 100) autoplay100.classList.add('active');
+            
+            // Start spinning
+            spin();
+        }
+        
+        // Stop autoplay
+        function stopAutoplay() {
+            playSound(clickSound);
+            autoplay = false;
+            autoplayCount = 0;
+            savedAutoplayCount = 0;
+            
+            // Update UI
+            [autoplay10, autoplay25, autoplay50, autoplay100].forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+        
+        // Start preloading assets
+        preloadSounds();
+        preloadImages();
+        
+        // Force initialization after timeout if not already initialized
+        setTimeout(() => {
+            if (loadingScreen.style.display !== 'none') {
+                console.log('Forcing initialization after timeout');
+                loadingScreen.style.display = 'none';
+                createReels();
+                updateUI();
+                setupEventListeners();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
